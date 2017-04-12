@@ -1,17 +1,19 @@
 package br.com.cesed.calculadora;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import br.com.cesed.calculadora.expr.Expr;
+import br.com.cesed.calculadora.expr.Parser;
+import br.com.cesed.calculadora.expr.SyntaxException;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView campoExpressao;
-    private Button limpar;
-
     private String expressao = "";
 
     @Override
@@ -19,10 +21,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         campoExpressao = (TextView) findViewById(R.id.expressao);
         campoExpressao.setOnClickListener(this);
 
-        limpar = (Button) findViewById(R.id.limpar);
+        Button limpar = (Button) findViewById(R.id.limpar);
         limpar.setOnClickListener(this);
 
         Button zero = (Button) findViewById(R.id.button0);
@@ -124,43 +127,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 campoExpressao.setText(expressao);
                 break;
             case R.id.igual:
-                if(expressao.contains("/")){
-                    String valores[] = expressao.split("/");
-                    if(valores.length >= 2) {
-                        int valor1 = Integer.parseInt(valores[0]);
-                        int valor2 = Integer.parseInt(valores[1]);
-                        double resultado = valor1 / valor2;
-                        Toast.makeText(this, "Resultado da Divisão: " + resultado, Toast.LENGTH_LONG).show();
-                    }
-                    break;
-                }else if(expressao.contains("*")){
-                    String valores[] = expressao.split("\\*");
-                    if(valores.length >= 2){
-                        int valor1 = Integer.parseInt(valores[0]);
-                        int valor2 = Integer.parseInt(valores[1]);
-                        double resultado = valor1 * valor2;
-                        Toast.makeText(this, "Resultado da Mutiplicação: " + resultado, Toast.LENGTH_LONG).show();
-                    }
-                    break;
-                }else if(expressao.contains("+")){
-                    String valores[] = expressao.split("\\+");
-                    if(valores.length >= 2){
-                        int valor1 = Integer.parseInt(valores[0]);
-                        int valor2 = Integer.parseInt(valores[1]);
-                        double resultado = valor1 + valor2;
-                        Toast.makeText(this, "Resultado da Soma: " + resultado, Toast.LENGTH_LONG).show();
-                    }
-                    break;
-                }else if(expressao.contains("-")){
-                    String valores[] = expressao.split("-");
-                    if(valores.length >= 2){
-                        int valor1 = Integer.parseInt(valores[0]);
-                        int valor2 = Integer.parseInt(valores[1]);
-                        double resultado = valor1 - valor2;
-                        Toast.makeText(this, "Resultado da Subtração: " + resultado, Toast.LENGTH_LONG).show();
-                    }
-                    break;
+                Expr expr;
+                try {
+                    expr = Parser.parse(this.expressao);
+                    Toast.makeText(this, "Resultado da Expressão é:\n"+String.valueOf(expr.value()), Toast.LENGTH_SHORT).show();
+                } catch (SyntaxException e) {
+                    Toast.makeText(this, "Digite uma expressão válida!!", Toast.LENGTH_SHORT).show();
                 }
+                break;
         }
     }
 }
